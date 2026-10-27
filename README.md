@@ -2,7 +2,7 @@
 
 구조 회의용 프로토타입이에요. 백엔드 없이 프론트만으로 돌아가요.
 
-- 배포 주소: https://nyejin.github.io/axcellent-demo/
+- 저장소를 공개로 바꾸고 Settings → Pages → Source를 GitHub Actions로 두면 https://nyejin.github.io/axcellent-demo/ 에 올라가요 (`.github/workflows/pages.yml`). 비공개일 때는 로컬에서 `npm run dev`로 봐요.
 - 부서 화면은 [ax-frontend](https://github.com/ax-company-hq/ax-frontend) `dashboard-web`(dev, c1eb44a)을 그대로 가져왔어요.
 
 ## 보여 주는 구조
