@@ -41,6 +41,6 @@
 
 ```bash
 npm install
-npm run dev          # http://localhost:3005
+npm run dev          # http://localhost:3090
 npm run build:pages  # GitHub Pages용 빌드 (dist/, 404.html 포함)
 ```

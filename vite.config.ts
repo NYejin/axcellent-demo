@@ -8,6 +8,6 @@ export default defineConfig({
   base: process.env.DEMO_BASE ?? '/',
   plugins: [react()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  server: { port: 3005, strictPort: true },
-  preview: { port: 3005, strictPort: true },
+  server: { port: 3090, strictPort: true },
+  preview: { port: 3090, strictPort: true },
 })
