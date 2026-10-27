@@ -55,7 +55,7 @@ export default function InfraHosts() {
             <p className="text-xs text-white/70">{COMPANY.name} 사내 서버</p>
           </div>
           <div className="h-5 w-px bg-ink-300" aria-hidden="true" />
-          <ul className="grid w-full grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          <ul className="grid w-full grid-cols-2 gap-3 md:grid-cols-4">
             {hosts.map((h) => (
               <li key={h.id} className="rounded-2xl border border-ink-100 bg-app p-3 text-sm">
                 <p className="flex items-center gap-1.5 font-medium">

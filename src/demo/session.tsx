@@ -18,10 +18,12 @@ const SHARED = ['/agents/chat', '/agents/office']
 
 export const ACCOUNTS: Account[] = [
   { id: 'admin', name: '시스템 관리자', dept: '시스템 관리', email: 'admin@catbooks.example', home: '/system/hosts', allow: ['*'] },
-  { id: 'planning', name: '기획개발 담당', dept: '기획개발팀', email: 'planning@catbooks.example', home: '/planning', allow: ['/planning', ...SHARED] },
+  { id: 'planning', name: '기획 담당', dept: '기획팀', email: 'planning@catbooks.example', home: '/planning', allow: ['/planning', ...SHARED] },
+  { id: 'dev', name: '개발 담당', dept: '개발팀', email: 'dev@catbooks.example', home: '/dev', allow: ['/dev', ...SHARED] },
   { id: 'support', name: '고객지원 담당', dept: '고객지원팀', email: 'support@catbooks.example', home: '/support', allow: ['/', '/support', '/console', '/claims', '/queue', '/reviews', '/kb', ...SHARED] },
   { id: 'marketing', name: '마케팅 담당', dept: '마케팅팀', email: 'marketing@catbooks.example', home: '/marketing', allow: ['/marketing', ...SHARED] },
   { id: 'hr', name: '인사 담당', dept: '인사팀', email: 'hr@catbooks.example', home: '/hr', allow: ['/hr', ...SHARED] },
+  { id: 'ops', name: '운영 담당', dept: '운영팀', email: 'ops@catbooks.example', home: '/ops', allow: ['/ops', ...SHARED] },
   { id: 'finance', name: '재무 담당', dept: '재무팀', email: 'finance@catbooks.example', home: '/finance', allow: ['/finance', ...SHARED] },
   { id: 'data', name: '데이터분석 담당', dept: '데이터분석팀', email: 'data@catbooks.example', home: '/data', allow: ['/data', ...SHARED] },
 ]

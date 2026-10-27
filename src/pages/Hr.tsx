@@ -57,7 +57,30 @@ function Tile({ label, count, note, tone }: { label: string; count: number | str
 
 interface View { handovers: HandoverView[]; cards: HrCard[]; roster: Roster }
 
-export default function HrPage() {
+// 데모에서 인사(인수인계·담당 명부)와 운영(결정 기록·계획 비교)을 두 부서로 나눴다. 데이터는 같은 hr 서비스에서 받는다.
+export type HrPart = "hr" | "ops";
+const PART = {
+  hr: {
+    title: "인사 AI",
+    desc: "담당이 바뀔 때 일이 끊기지 않게 인수인계와 담당 명부를 관리합니다.",
+    guide: [
+      <>맨 위 <b>지금 사람이 할 일</b>에서 인계자의 답을 기다리는 질문을 봅니다.</>,
+      <>인계자가 <b>답하기</b>로 채웁니다. 모든 항목이 차면 완성도가 올라가 확정할 수 있게 됩니다.</>,
+      <>인수인계의 시작·확정은 총괄 AI가 요청합니다. 이 화면에는 그 버튼이 없습니다.</>,
+    ],
+  },
+  ops: {
+    title: "운영 AI",
+    desc: "회사의 결정을 기록으로 남기고, 새 계획이 과거에 기각된 안과 겹치는지 확인합니다.",
+    guide: [
+      <>맨 위 <b>지금 사람이 할 일</b>에서 확신이 낮아 후보로 남은 기록을 봅니다.</>,
+      <>내용을 읽고 <b>기록으로 확정</b> 또는 <b>폐기</b>를 누릅니다. 애매하면 폐기하세요. 필요하면 요청한 AI가 근거를 보강해 다시 올립니다.</>,
+    ],
+  },
+} satisfies Record<HrPart, { title: string; desc: string; guide: ReactNode[] }>;
+
+export default function HrPage({ part = "hr" }: { part?: HrPart }) {
+  const P = PART[part];
   const [view, setView] = useState<View | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [up, setUp] = useState(true);
@@ -75,8 +98,9 @@ export default function HrPage() {
   }, [load]);
 
   if (!view) return <Loading error={error} />;
-  const { handovers, cards, roster } = view;
-  const questions = handovers.flatMap((h) => h.open_questions);
+  const { handovers, roster } = view;
+  const cards = part === "ops" ? view.cards : [];
+  const questions = part === "hr" ? handovers.flatMap((h) => h.open_questions) : [];
   const todo = cards.length + questions.length;
   const tone = todo ? "text-amber-800" : "text-emerald-800";
   const count = (s: HandoverStatus) => handovers.filter((h) => h.status === s).length;
@@ -85,21 +109,18 @@ export default function HrPage() {
     <div className="max-w-[1320px] space-y-8 px-8 pb-12 pt-2">
       <header className="flex flex-wrap items-end gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">인사 AI</h1>
-          <p className="mt-1 max-w-2xl text-sm text-ink-500">회사의 결정과 담당을 기록하고, 담당이 바뀔 때 일이 끊기지 않게 인수인계를 돕습니다. 완성도와 판정은 AI가 아니라 정해진 계산과 기준으로 합니다.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{P.title}</h1>
+          <p className="mt-1 max-w-2xl text-sm text-ink-500">{P.desc} 완성도와 판정은 AI가 아니라 정해진 계산과 기준으로 합니다.</p>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">
-          <Chip label={up ? "인사 AI 켜짐" : "인사 AI 꺼짐"} tone={up ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"} />
+          <Chip label={`${P.title} ${up ? "켜짐" : "꺼짐"}`} tone={up ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"} />
         </div>
       </header>
 
       <details className="rounded-2xl border border-ink-100 bg-surface px-5 py-3 text-sm">
         <summary className="cursor-pointer font-semibold text-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-500">처음이라면: 관리자가 할 일</summary>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-ink-700">
-          <li>맨 위 <b>지금 사람이 할 일</b>을 봅니다. 확신이 낮아 후보로 남은 기록과, 인계자의 답을 기다리는 질문이 여기에 모입니다.</li>
-          <li>후보 기록은 내용을 읽고 <b>기록으로 확정</b> 또는 <b>폐기</b>를 누릅니다. 애매하면 폐기하세요. 필요하면 요청한 AI가 근거를 보강해 다시 올립니다.</li>
-          <li>인수인계 질문은 인계자가 <b>답하기</b>로 채웁니다. 모든 항목이 차면 완성도가 올라가 확정할 수 있게 됩니다.</li>
-          <li>인수인계의 시작·확정은 총괄 AI가 요청합니다. 이 화면에는 그 버튼이 없습니다.</li>
+          {P.guide.map((g, i) => <li key={i}>{g}</li>)}
         </ol>
       </details>
 
@@ -112,14 +133,10 @@ export default function HrPage() {
             <h2 id="todo" className={`text-sm font-semibold ${tone}`}>지금 사람이 할 일</h2>
             <p className={`mt-1 text-4xl font-bold tabular-nums ${tone}`}>{todo ? `${todo}건` : "없음"}</p>
           </div>
-          {todo > 0 && (
-            <dl className={`flex gap-8 pb-1 text-sm ${tone}`}>
-              <div><dt className="text-xs opacity-80">확인할 후보 기록</dt><dd className="text-lg font-semibold tabular-nums">{cards.length}건</dd></div>
-              <div><dt className="text-xs opacity-80">답을 기다리는 질문</dt><dd className="text-lg font-semibold tabular-nums">{questions.length}건</dd></div>
-            </dl>
-          )}
           <p className={`ml-auto max-w-sm pb-1 text-xs ${tone}`}>
-            대부분의 기록은 인사 AI가 근거를 보고 바로 남깁니다. 근거가 약해 확신이 낮은 기록과, 인계자만 알 수 있는 내용만 여기로 옵니다.
+            {part === "ops"
+              ? "대부분의 기록은 운영 AI가 근거를 보고 바로 남깁니다. 근거가 약해 확신이 낮은 기록만 여기로 옵니다."
+              : "인계자만 알 수 있는 내용을 묻는 질문만 여기로 옵니다."}
           </p>
         </div>
         {!HUMAN_TOKEN_SET && todo > 0 && <p className="mt-3 text-xs text-amber-800">사람 권한(VITE_SAFETY_HUMAN_TOKEN)이 설정되지 않아 버튼이 꺼져 있습니다.</p>}
@@ -131,6 +148,7 @@ export default function HrPage() {
         )}
       </section>
 
+      {part === "hr" && <>
       {/* ② 인수인계 */}
       <Section title="인수인계 현황" desc="담당이 바뀔 때 넘길 일을 모아 둔 목록입니다. 완성도는 코드가 계산한 값이고, 시작과 확정은 총괄 AI가 요청합니다.">
         <div className="grid gap-3 sm:grid-cols-4">
@@ -149,10 +167,13 @@ export default function HrPage() {
         {roster.gap_areas.length > 0 && <p className="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-800">담당이 비는 영역: {roster.gap_areas.join(", ")}</p>}
         <RosterGrid roster={roster} />
       </Section>
+      </>}
 
+      {part === "ops" && <>
       {/* ④ 기록 도구 */}
       <Section title="계획 비교" desc="새 계획이 과거에 기각된 안과 겹치는지 확인합니다. 저장하지 않고 보기만 합니다."><PlanChecker /></Section>
-      <Section title="인사 AI가 한 일" desc="사건 번호로 인사 AI의 처리 내역을 시간순으로 봅니다."><Activity /></Section>
+      <Section title={`${P.title}가 한 일`} desc={`사건 번호로 ${P.title}의 처리 내역을 시간순으로 봅니다.`}><Activity /></Section>
+      </>}
     </div>
   );
 }

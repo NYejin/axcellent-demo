@@ -1,4 +1,4 @@
-// 기획개발팀 화면. 업무 시스템(dashboard-web)의 /planning 탭 안에서 돈다.
+// 기획팀(/planning)·개발팀(/dev) 화면. 업무 시스템(dashboard-web) 안에서 돈다.
 // 메뉴 = 프로젝트·요청·작업·정리·소통·규정·자료·지표, 각 메뉴의 하위 목록은 그 아래 가로탭. 화면 안 이동은 해시(#/<메뉴>/<가로탭>)로 한다.
 // 공통 화면 컴포넌트(@dejafix/common-frontend)의 스타일은 .planning-scope 안에만 적용된다 (postcss.config.js).
 import '@dejafix/common-frontend/styles.css'
@@ -15,69 +15,80 @@ import { Talk } from './talk'
 import { Projects } from './projects'
 import { convoHref } from './links'
 import { Knowledge } from './knowledge'
+import { useUiStyle } from '@/demo/uiStyle'
 
 type IconName = NonNullable<NavItem['icon']>
 interface Section { label: string; icon: IconName; tabs: { id: string; label: string }[] }
-const SECTIONS = {
-  projects: { label: '프로젝트', icon: 'menu', tabs: [] },
-  requests: { label: '요청', icon: 'bell', tabs: [] }, // 들어온·진행 중·해결·후속은 화면 안 필터 (#/requests/<필터>)
-  work: { label: '작업', icon: 'plan', tabs: [
-    { id: 'specs', label: '기획·기획서' },
-    { id: 'prs', label: '작업·PR' },
-    { id: 'reviews', label: 'AI 교차검증' },
-    { id: 'ops', label: '운영·배포' },
-    { id: 'aftercare', label: '사후관리' },
-  ] },
-  docs: { label: '정리', icon: 'report', tabs: [] },
-  talk: { label: '소통', icon: 'send', tabs: [] },
-  knowledge: { label: '규정·자료', icon: 'admin', tabs: [] },
-  metrics: { label: '지표', icon: 'dashboard', tabs: [
-    { id: 'overview', label: '지표' },
-    { id: 'autonomy', label: '자동 처리 범위' },
-    { id: 'audit', label: 'AI 승인 감사' },
-    { id: 'activity', label: '에이전트 활동' },
-    { id: 'links', label: '부서 연동' },
-  ] },
-} satisfies Record<string, Section>
-type SectionId = keyof typeof SECTIONS
-const isSection = (x: string): x is SectionId => x in SECTIONS
 
-function useRoute(): string {
-  const read = () => location.hash.replace(/^#\/?/, '') || 'requests'
+// 데모에서 기획(요청을 기획서로)과 개발(작업·검증·배포·사후관리)을 두 부서로 나눴다. 데이터는 같은 기획개발 서비스에서 받는다.
+export type PlanningPart = 'planning' | 'dev'
+const PARTS: Record<PlanningPart, { title: string; desc: string; home: string; sections: Record<string, Section> }> = {
+  planning: {
+    title: '기획 AI',
+    desc: '다른 부서의 요청을 받아 기획서로 정리하고, 결과를 요청한 부서에 알립니다.',
+    home: 'requests',
+    sections: {
+      projects: { label: '프로젝트', icon: 'menu', tabs: [] },
+      requests: { label: '요청', icon: 'bell', tabs: [] }, // 들어온·진행 중·해결·후속은 화면 안 필터 (#/requests/<필터>)
+      work: { label: '기획서', icon: 'plan', tabs: [{ id: 'specs', label: '기획서' }] },
+      docs: { label: '정리', icon: 'report', tabs: [] },
+      talk: { label: '소통', icon: 'send', tabs: [] },
+      knowledge: { label: '규정·자료', icon: 'admin', tabs: [] },
+      metrics: { label: '지표', icon: 'dashboard', tabs: [
+        { id: 'overview', label: '지표' },
+        { id: 'links', label: '부서 연동' },
+      ] },
+    },
+  },
+  dev: {
+    title: '개발 AI',
+    desc: '확정된 기획서를 작업·PR로 만들고, 교차검증·배포·사후관리까지 맡습니다.',
+    home: 'work/prs',
+    sections: {
+      work: { label: '작업', icon: 'plan', tabs: [
+        { id: 'prs', label: '작업·PR' },
+        { id: 'reviews', label: 'AI 교차검증' },
+        { id: 'ops', label: '운영·배포' },
+        { id: 'aftercare', label: '사후관리' },
+      ] },
+      talk: { label: '소통', icon: 'send', tabs: [] },
+      metrics: { label: '지표', icon: 'dashboard', tabs: [
+        { id: 'autonomy', label: '자동 처리 범위' },
+        { id: 'audit', label: 'AI 승인 감사' },
+        { id: 'activity', label: '에이전트 활동' },
+      ] },
+    },
+  },
+}
+
+function useRoute(home: string): string {
+  const read = () => location.hash.replace(/^#\/?/, '') || home
   const [r, setR] = useState(read)
   useEffect(() => {
     const on = () => setR(read())
     window.addEventListener('hashchange', on)
     return () => window.removeEventListener('hashchange', on)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   return r
 }
 
-// 업무 시스템의 밝은·어두운 테마(<html class="dark">)를 공통 컴포넌트 테마(data-theme)로 옮긴다
-function useDark(): boolean {
-  const read = () => document.documentElement.classList.contains('dark')
-  const [dark, setDark] = useState(read)
-  useEffect(() => {
-    const ob = new MutationObserver(() => setDark(read()))
-    ob.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => ob.disconnect()
-  }, [])
-  return dark
-}
-
-export default function PlanningPage() {
-  const dark = useDark()
+export default function PlanningPage({ part = 'planning' }: { part?: PlanningPart }) {
+  // 화면 스타일 토글이 '공통'이면 업무 시스템 색으로 덮어쓰지 않고 common-frontend 원래 모양을 쓴다 (planning.css)
+  const ui = useUiStyle()
   return (
-    <div className="planning-scope" data-theme={dark ? 'dark' : 'light'}>
+    <div className="planning-scope" data-theme="light" data-ui={ui}>
       <ToastProvider>
-        <Planning />
+        <Planning key={part} part={part} />
       </ToastProvider>
     </div>
   )
 }
 
-function Planning() {
-  const route = useRoute()
+function Planning({ part }: { part: PlanningPart }) {
+  const P = PARTS[part]
+  const SECTIONS = P.sections
+  const isSection = (x: string) => x in SECTIONS
+  const route = useRoute(P.home)
   const [state, dispatch, connected] = useSharedStore()
   const toast = useToast()
   useEffect(() => {
@@ -93,8 +104,8 @@ function Planning() {
   const [item, item2] = (tabs.length ? rest : [sub, ...rest]).map((x) => (x ? decodeURIComponent(x) : undefined))
   // 없는 화면 주소(예: 예전 '참여한 사건')는 들어온 요청으로 돌린다
   useEffect(() => {
-    if (!planning) location.replace('#/requests')
-  }, [planning, section])
+    if (!planning) location.replace(`#/${P.home}`)
+  }, [planning, section]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 다른 부서에서 들어온 것: 기획개발 화면(요청·작업)을 볼 때까지 "새로"로 센다
   const inbound = state.activity.filter((x) => x.seq && x.to === 'planning')
@@ -113,9 +124,9 @@ function Planning() {
   const incoming = incomingCount(state)
   const recentIn = inbound.filter((x) => x.point !== 'message').slice(-3).reverse()
 
-  const badge: Partial<Record<SectionId, number>> = { requests: newWork || incoming, talk: newTalk }
+  const badge: Record<string, number> = part === 'planning' ? { requests: newWork || incoming, talk: newTalk } : { talk: newTalk }
   const menu = [
-    ...(Object.keys(SECTIONS) as SectionId[]).map((id) => ({
+    ...Object.keys(SECTIONS).map((id) => ({
       href: `#/${id}${SECTIONS[id].tabs[0] ? `/${SECTIONS[id].tabs[0].id}` : ''}`,
       label: SECTIONS[id].label,
       on: section === id,
@@ -127,18 +138,18 @@ function Planning() {
     <div className="main">
       <header className="pl-head">
         <div>
-          <h1 className="pl-title">기획개발 AI</h1>
-          <p className="pl-desc">다른 부서의 요청을 기획서·작업·PR로 처리하고, 결과를 요청한 부서에 알립니다.</p>
+          <h1 className="pl-title">{P.title}</h1>
+          <p className="pl-desc">{P.desc}</p>
         </div>
         <div className="pl-tools">
           <Chip tone={connected ? 'green' : 'amber'} title={`기획개발 서버 ${PLANNING_API}`}>
-            {connected ? '기획개발 AI 켜짐' : '기획개발 AI 꺼짐'}
+            {`${P.title} ${connected ? '켜짐' : '꺼짐'}`}
           </Chip>
           <ToastOutlet />
         </div>
       </header>
       <div className="pl-bar">
-        <nav className="pl-menu" aria-label="기획개발 메뉴">
+        <nav className="pl-menu" aria-label={`${P.title} 메뉴`}>
           {menu.map((m) => (
             <a key={m.href} href={m.href} className={m.on ? 'on' : ''} aria-current={m.on ? 'page' : undefined}>
               {m.label}
@@ -150,7 +161,7 @@ function Planning() {
 
       {planning ? (
         <main className="page page-wide">
-          {tabs.length > 0 && (
+          {tabs.length > 1 && (
             <div className="subtabs" role="tablist" aria-label={`${SECTIONS[section].label} 메뉴`}>
               {tabs.map((t) => {
                 const n = section === 'work' && t.id === 'reviews' ? state.reviews.filter((x) => !x.result).length : 0

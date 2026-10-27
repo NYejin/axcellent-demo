@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
 
-import { ThemeProvider } from '@/components/ThemeProvider'
 import { AdminShell } from '@/components/admin/AdminShell'
 import AgentChat from '@/pages/AgentChat'
 import AgentOffice from '@/pages/AgentOffice'
@@ -26,12 +25,10 @@ import { canOpen, useSession } from '@/demo/session'
 
 export function App() {
   return (
-    <ThemeProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Guarded><Pages /></Guarded>} />
-      </Routes>
-    </ThemeProvider>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="*" element={<Guarded><Pages /></Guarded>} />
+    </Routes>
   )
 }
 
@@ -56,12 +53,13 @@ function Pages() {
           <Route path="/kb" element={<Kb />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/finance/guide" element={<FinanceGuide />} />
-          <Route path="/hr" element={<Hr />} />
+          <Route path="/hr" element={<Hr part="hr" />} />
+          <Route path="/ops" element={<Hr part="ops" />} />
           <Route path="/marketing" element={<Marketing />} />
           <Route path="/orchestrator" element={<Orchestrator />} />
           <Route path="/data" element={<Data />} />
-          <Route path="/hr" element={<Hr />} />
-          <Route path="/planning" element={<PlanningPage />} />
+          <Route path="/planning" element={<PlanningPage part="planning" />} />
+          <Route path="/dev" element={<PlanningPage part="dev" />} />
           <Route path="/agents/chat" element={<AgentChat />} />
           <Route path="/agents/office" element={<AgentOffice />} />
           <Route path="/support" element={<Support />} />

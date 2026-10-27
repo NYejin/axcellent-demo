@@ -452,8 +452,9 @@ a.plain-link:hover { color: var(--primary); }
 @media (prefers-reduced-motion: reduce) { .rq-item.fresh { animation: none; } .rq-c::before, .rq-c .rq-dot { transition: none; } }
 
 /* 업무 시스템(dashboard-web) 안의 기획개발 탭. 다른 부서 탭(인사·재무 AI)과 같은 색·글꼴·둥근 모서리로 맞춘다.
-   common-frontend 토큰을 업무 시스템 styles.css 값으로 덮어쓴다(그쪽 변수는 이름이 겹쳐 여기서 직접 못 읽어 값을 옮겨 적음). */
-.planning-scope.planning-scope {
+   common-frontend 토큰을 업무 시스템 styles.css 값으로 덮어쓴다(그쪽 변수는 이름이 겹쳐 여기서 직접 못 읽어 값을 옮겨 적음).
+   화면 스타일 토글이 '공통'(data-ui=common)이면 덮어쓰지 않고 common-frontend 원래 모양을 쓴다. */
+.planning-scope.planning-scope:not([data-ui='common']) {
   --bg: #ffffff; --surface: #ffffff; --surface-2: #f7f6fd;
   --text: #222234; --text-2: #3e3e52; --text-3: #78788c;
   --border: #efeff5; --border-strong: #d2d2de; --hover: #efeff5; --track: #efeff5; --chip-neutral-bg: #efeff5;
@@ -483,5 +484,5 @@ a.plain-link:hover { color: var(--primary); }
 .pl-menu a.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--text); }
 .pl-tools { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
 .planning-scope .page { max-width: 1320px; padding: 24px 32px 48px; }
-.planning-scope .card { border: 0; box-shadow: var(--shadow-sm); }
+.planning-scope:not([data-ui='common']) .card { border: 0; box-shadow: var(--shadow-sm); }
 .planning-scope[data-theme='dark'] .card { border: 1px solid var(--border); }
