@@ -17,7 +17,7 @@ export type Account = {
 const SHARED = ['/agents/chat', '/agents/office']
 
 export const ACCOUNTS: Account[] = [
-  { id: 'admin', name: '시스템 관리자', dept: '시스템 관리', email: 'admin@catbooks.example', home: '/system/hosts', allow: ['*'] },
+  { id: 'admin', name: '시스템 관리자', dept: '시스템 관리', email: 'admin@catbooks.example', home: '/system/hosts', allow: ['/system', '/orchestrator', ...SHARED] }, // 부서 화면은 열지 않는다
   { id: 'planning', name: '기획 담당', dept: '기획팀', email: 'planning@catbooks.example', home: '/planning', allow: ['/planning', ...SHARED] },
   { id: 'dev', name: '개발 담당', dept: '개발팀', email: 'dev@catbooks.example', home: '/dev', allow: ['/dev', ...SHARED] },
   { id: 'support', name: '고객지원 담당', dept: '고객지원팀', email: 'support@catbooks.example', home: '/support', allow: ['/', '/support', '/console', '/claims', '/queue', '/reviews', '/kb', ...SHARED] },
