@@ -10,7 +10,16 @@ const STATUS: Record<Host['status'], { label: string; tone: string; dot: string 
   pending: { label: '연결 확인 중', tone: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
 }
 
+// DejaFix 서비스 화면: scripts/build-dejafix.mjs가 DejaFix 레포 frontend를 목 데이터 버전으로 빌드해 public/dejafix/에 넣는다
+const DEJAFIX_SRC = `${import.meta.env.BASE_URL}dejafix/index.html#/`
+const TABS = [
+  { id: 'dejafix', label: 'DejaFix 서비스' },
+  { id: 'hosts', label: '부서 PC 연결' },
+] as const
+type Tab = (typeof TABS)[number]['id']
+
 export default function InfraHosts() {
+  const [tab, setTab] = useState<Tab>('dejafix')
   const [hosts, setHosts] = useHosts()
   const [form, setForm] = useState({ dept: DEPTS[0], hostname: '', ip: '' })
   const [error, setError] = useState<string | null>(null)
@@ -35,12 +44,12 @@ export default function InfraHosts() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-8 py-8">
+    <div className={tab === 'dejafix' ? 'flex flex-col gap-4 px-8 py-6' : 'mx-auto max-w-6xl space-y-6 px-8 py-8'}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-ink-500">인프라팀 · DejaFix</p>
           <h1 className="text-2xl font-semibold">인프라 AI</h1>
-          <p className="mt-1 text-sm text-ink-500">부서 PC를 사내 IP로 연결하고 연결 상태를 챙깁니다.</p>
+          <p className="mt-1 text-sm text-ink-500">서버 장애를 찾아 원인과 조치 계획을 내고, 부서 PC를 사내 IP로 연결합니다.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="chip bg-ink-100 text-ink-700">사내망 {COMPANY.network}</span>
@@ -49,6 +58,22 @@ export default function InfraHosts() {
         </div>
       </header>
 
+      <div className="flex gap-6 border-b border-ink-100" role="tablist" aria-label="인프라 AI 메뉴">
+        {TABS.map((t) => (
+          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
+            className={`relative -mb-px py-2.5 text-sm transition ${tab === t.id ? 'font-semibold text-ink-900' : 'text-ink-500 hover:text-ink-900'}`}>
+            {t.label}
+            {tab === t.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-ink-900" />}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'dejafix' && (
+        <iframe title="DejaFix 서비스 (목 데이터)" src={DEJAFIX_SRC}
+          className="h-[calc(100vh-240px)] min-h-[560px] w-full rounded-2xl border border-ink-100 bg-surface" />
+      )}
+
+      {tab === 'hosts' && <>
       <section className="card p-6">
         <div className="flex flex-col items-center gap-5">
           <div className="rounded-2xl bg-brand-600 px-6 py-3 text-center text-white">
@@ -116,6 +141,7 @@ export default function InfraHosts() {
         </form>
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </section>
+      </>}
     </div>
   )
 }
