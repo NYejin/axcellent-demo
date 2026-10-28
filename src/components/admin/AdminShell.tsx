@@ -6,6 +6,10 @@ import { COMPANY, canOpen, homeOf, servicesOf, useSession } from "@/demo/session
 import { activeChild, matchPath, useEnabledServices, type SubItem } from "@/demo/services";
 import { IconAgents, IconBell, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
 import { UiStyleToggle, useUiStyle } from "@/demo/uiStyle";
+import { DejaFixTools } from "@/demo/DejaFixTools";
+
+/** DejaFix 장애 대응 화면이면 그 상단바 도구를 바깥 상단바에 둔다 */
+const onDejaFix = (path: string) => matchPath("/infra", path);
 
 // 메뉴는 부서가 아니라 서비스다. 이 계정에 배정됐고 회사가 켠 서비스만 보인다 (src/demo/services.ts, session.tsx).
 type NavItem = { href: string; label: string; Icon: ComponentType<{ size?: number }>; logo?: string; children?: SubItem[]; match: string[] };
@@ -87,6 +91,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             })}
             </div>
             <div className="flex shrink-0 items-center gap-4 text-ink-700">
+              {onDejaFix(path) && <DejaFixTools compact />}
               {account && canOpen(account, "/console") && <Link href="/console" title="문의 찾기" aria-label="문의 찾기"><IconSearch size={20} /></Link>}
               <IconBell size={20} />
               <span className="chip hidden bg-emerald-50 text-emerald-700 2xl:inline-flex" title="사내망에서만 열리고 외부 접근은 막혀 있습니다">사내망 {COMPANY.network}</span>
@@ -177,6 +182,7 @@ function CommonShell({ nav, home, children }: { nav: NavItem[]; home: string; ch
           <span className="shrink-0 text-[15px] font-semibold">AXcellent <span className="font-normal text-ink-500">with</span> {COMPANY.name}</span>
           <span className="chip hidden bg-emerald-50 text-emerald-700 xl:inline-flex" title="사내망에서만 열리고 외부 접근은 막혀 있습니다">사내망 {COMPANY.network}</span>
           <div className="flex-1" />
+          {onDejaFix(path) && <DejaFixTools />}
           <div className="flex shrink-0 items-center gap-4 text-ink-700">
             {account && canOpen(account, "/console") && <Link href="/console" title="문의 찾기" aria-label="문의 찾기"><IconSearch size={20} /></Link>}
             <IconBell size={20} />
