@@ -17,9 +17,11 @@ export type Account = {
 const SHARED = ['/agents/chat', '/agents/office']
 
 export const ACCOUNTS: Account[] = [
-  { id: 'admin', name: '시스템 관리자', dept: '시스템 관리', email: 'admin@catbooks.example', home: '/system/hosts', allow: ['/system', '/orchestrator', ...SHARED] }, // 부서 화면은 열지 않는다
+  { id: 'admin', name: '시스템 관리자', dept: '시스템 관리', email: 'admin@catbooks.example', home: '/system/integrations', allow: ['/system', '/orchestrator', ...SHARED] }, // 부서 화면은 열지 않는다
   { id: 'planning', name: '기획 담당', dept: '기획팀', email: 'planning@catbooks.example', home: '/planning', allow: ['/planning', ...SHARED] },
   { id: 'dev', name: '개발 담당', dept: '개발팀', email: 'dev@catbooks.example', home: '/dev', allow: ['/dev', ...SHARED] },
+  // 인프라팀 = DejaFix. 부서 PC를 IP로 연결하고 연결 상태를 챙긴다
+  { id: 'infra', name: '인프라 담당', dept: '인프라팀', email: 'infra@catbooks.example', home: '/infra', allow: ['/infra', ...SHARED] },
   { id: 'support', name: '고객지원 담당', dept: '고객지원팀', email: 'support@catbooks.example', home: '/support', allow: ['/', '/support', '/console', '/claims', '/queue', '/reviews', '/kb', ...SHARED] },
   { id: 'marketing', name: '마케팅 담당', dept: '마케팅팀', email: 'marketing@catbooks.example', home: '/marketing', allow: ['/marketing', ...SHARED] },
   { id: 'hr', name: '인사 담당', dept: '인사팀', email: 'hr@catbooks.example', home: '/hr', allow: ['/hr', ...SHARED] },

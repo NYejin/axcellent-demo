@@ -23,13 +23,14 @@ export type Integration = {
   lastSync: string | null
 }
 
-export const DEPTS = ['기획팀', '개발팀', '고객지원팀', '마케팅팀', '인사팀', '운영팀', '재무팀', '데이터분석팀']
+export const DEPTS = ['인프라팀', '기획팀', '개발팀', '고객지원팀', '마케팅팀', '인사팀', '운영팀', '재무팀', '데이터분석팀']
 export const SCOPES = ['주문', '결제', '고객 문의', '리뷰', '정산', '배포 기록']
 
 const now = () => new Date().toISOString()
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString()
 
 const DEFAULT_HOSTS: Host[] = [
+  { id: 'h0', dept: '인프라팀', hostname: 'dejafix-srv-01', ip: '192.168.10.10', status: 'online', agent: '인프라 AI (DejaFix) 0.9', lastSeen: minutesAgo(0) },
   { id: 'h1', dept: '기획팀', hostname: 'plan-pc-01', ip: '192.168.10.21', status: 'online', agent: '기획 AI 0.9', lastSeen: minutesAgo(0) },
   { id: 'h7', dept: '개발팀', hostname: 'dev-pc-01', ip: '192.168.10.22', status: 'online', agent: '개발 AI 0.9', lastSeen: minutesAgo(0) },
   { id: 'h2', dept: '고객지원팀', hostname: 'cs-pc-01', ip: '192.168.10.31', status: 'online', agent: '고객지원 AI 0.9', lastSeen: minutesAgo(1) },
@@ -66,7 +67,7 @@ function usePersisted<T>(key: string, fallback: T): [T, Dispatch<SetStateAction<
   return [value, setValue]
 }
 
-export const useHosts = () => usePersisted('axcellent-demo-hosts-v2', DEFAULT_HOSTS)
+export const useHosts = () => usePersisted('axcellent-demo-hosts-v3', DEFAULT_HOSTS)
 export const useIntegrations = () => usePersisted('axcellent-demo-integrations', DEFAULT_INTEGRATIONS)
 export const newId = () => Math.random().toString(36).slice(2, 9)
 export { now }

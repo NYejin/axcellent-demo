@@ -17,11 +17,11 @@ const NAV = [
   { href: "/marketing", label: "마케팅 AI", Icon: IconMegaphone },
   { href: "/planning", label: "기획 AI", Icon: IconPlan },
   { href: "/dev", label: "개발 AI", Icon: IconCode },
+  { href: "/infra", label: "인프라 AI", Icon: IconBox },
   { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents },
   { href: "/support", label: "고객지원 AI", Icon: IconUser },
   { href: "/agents/office", label: "AI 오피스", Icon: IconOffice },
   // 데모에서 더한 시스템 관리 화면 (관리자 계정만)
-  { href: "/system/hosts", label: "부서 PC 연결", Icon: IconBox },
   { href: "/system/integrations", label: "서비스 연결", Icon: IconLayout },
 ];
 

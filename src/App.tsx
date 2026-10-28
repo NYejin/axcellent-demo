@@ -63,7 +63,8 @@ function Pages() {
           <Route path="/agents/chat" element={<AgentChat />} />
           <Route path="/agents/office" element={<AgentOffice />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/system/hosts" element={<InfraHosts />} />
+          <Route path="/infra" element={<InfraHosts />} />
+          <Route path="/system/hosts" element={<Navigate to="/infra" replace />} />
           <Route path="/system/integrations" element={<Integrations />} />
           {/* catbooks 시절 /admin/* 주소 호환 */}
           <Route path="/admin/*" element={<LegacyAdminRedirect />} />

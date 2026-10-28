@@ -3,7 +3,7 @@ import { ago } from '@/lib/format'
 import { COMPANY } from './session'
 import { DEPTS, newId, now, privateIp, useHosts, type Host } from './store'
 
-// DejaFix 인프라: 자빅스처럼 부서 PC를 IP로 등록해 연결한다. 사내망 주소만 받아서 시스템이 회사 밖으로 열리지 않는다.
+// 인프라팀(DejaFix) 화면: 자빅스처럼 부서 PC를 IP로 등록해 연결한다. 사내망 주소만 받아서 시스템이 회사 밖으로 열리지 않는다.
 const STATUS: Record<Host['status'], { label: string; tone: string; dot: string }> = {
   online: { label: '연결됨', tone: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' },
   offline: { label: '응답 없음', tone: 'bg-red-50 text-red-700', dot: 'bg-red-500' },
@@ -38,8 +38,9 @@ export default function InfraHosts() {
     <div className="mx-auto max-w-6xl space-y-6 px-8 py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-ink-500">DejaFix 인프라</p>
-          <h1 className="text-2xl font-semibold">부서 PC 연결</h1>
+          <p className="text-sm text-ink-500">인프라팀 · DejaFix</p>
+          <h1 className="text-2xl font-semibold">인프라 AI</h1>
+          <p className="mt-1 text-sm text-ink-500">부서 PC를 사내 IP로 연결하고 연결 상태를 챙깁니다.</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="chip bg-ink-100 text-ink-700">사내망 {COMPANY.network}</span>
@@ -55,7 +56,7 @@ export default function InfraHosts() {
             <p className="text-xs text-white/70">{COMPANY.name} 사내 서버</p>
           </div>
           <div className="h-5 w-px bg-ink-300" aria-hidden="true" />
-          <ul className="grid w-full grid-cols-2 gap-3 md:grid-cols-4">
+          <ul className="grid w-full grid-cols-2 gap-3 md:grid-cols-3">
             {hosts.map((h) => (
               <li key={h.id} className="rounded-2xl border border-ink-100 bg-app p-3 text-sm">
                 <p className="flex items-center gap-1.5 font-medium">
