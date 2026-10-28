@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { ACCOUNTS, useSession } from './session'
+import { ACCOUNTS, homeOf, servicesOf, useSession } from './session'
+import { useEnabledServices } from './services'
 
-// 데모 전용: 부서 계정을 바꿔 가며 각 부서 페이지를 보여 준다. 실제 제품에는 없고, 로그인한 계정의 부서 페이지만 열린다.
+// 데모 전용: 예시 직원 계정을 바꿔 가며 배정된 서비스 화면을 보여 준다. 실제 제품에는 없다.
 export function AccountSwitcher() {
   const { account, signIn, signOut } = useSession()
   const navigate = useNavigate()
+  const enabled = useEnabledServices()
   const [open, setOpen] = useState(false)
   const box = useRef<HTMLDivElement>(null)
 
@@ -27,7 +29,7 @@ export function AccountSwitcher() {
   const pick = (id: string) => {
     const a = signIn(id)
     setOpen(false)
-    if (a) navigate(a.home)
+    if (a) navigate(homeOf(a, enabled))
   }
 
   return (
@@ -35,9 +37,9 @@ export function AccountSwitcher() {
       <button type="button" onClick={() => setOpen((v) => !v)} aria-haspopup="menu" aria-expanded={open}
         className="flex items-center gap-2 rounded-full border border-ink-100 bg-surface py-1 pl-1 pr-3 text-sm hover:bg-ink-100">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">
-          {account.dept.slice(0, 1)}
+          {account.role.slice(0, 1)}
         </span>
-        <span className="font-medium">{account.dept}</span>
+        <span className="font-medium">{account.role}</span>
         <span className="text-ink-500" aria-hidden="true">▾</span>
       </button>
       {open && (
@@ -47,8 +49,8 @@ export function AccountSwitcher() {
             <button key={a.id} role="menuitemradio" aria-checked={a.id === account.id} type="button" onClick={() => pick(a.id)}
               className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm hover:bg-ink-100 ${a.id === account.id ? 'bg-brand-50' : ''}`}>
               <span>
-                <span className="block font-medium">{a.dept}</span>
-                <span className="block text-xs text-ink-500">{a.email}</span>
+                <span className="block font-medium">{a.role}</span>
+                <span className="block text-xs text-ink-500">{servicesOf(a, enabled).map((s) => s.name).join(' · ') || a.email}</span>
               </span>
               {a.id === account.id && <span className="text-brand-600" aria-hidden="true">●</span>}
             </button>

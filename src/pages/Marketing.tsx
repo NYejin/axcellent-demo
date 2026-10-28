@@ -57,7 +57,7 @@ export default function MarketingPage() {
     <div className="w-full space-y-8 px-8 pb-12 pt-2">
       <header className="flex flex-wrap items-end gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">마케팅 AI</h1>
+          <h1 className="text-2xl font-bold tracking-tight">공지·쿠폰</h1>
           <p className="mt-1 max-w-2xl text-sm text-ink-500">고객에게 알리고(공지), 혜택을 주는(쿠폰) 일을 돕습니다. 공지는 확인된 사실로만 쓰고, 쿠폰 금액의 검증과 등급 판정은 안전 장치의 코드 규칙이 합니다.</p>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2 text-xs">

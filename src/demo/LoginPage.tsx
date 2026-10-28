@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { ACCOUNTS, COMPANY, useSession } from './session'
+import { ACCOUNTS, COMPANY, homeOf, useSession } from './session'
 
-// 사내망 안에서만 열리는 로그인 화면. 가입할 때 등록한 부서에 따라 로그인 뒤 열리는 페이지가 다르다.
+// 사내망 안에서만 열리는 로그인 화면. 계정에 배정된 서비스에 따라 로그인 뒤 보이는 메뉴가 다르다.
 // 데모라 비밀번호는 확인하지 않는다.
 export default function LoginPage() {
   const { signIn } = useSession()
@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   const enter = (id: string) => {
     const a = signIn(id)
-    if (a) navigate(a.home, { replace: true })
+    if (a) navigate(homeOf(a), { replace: true })
   }
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -32,9 +32,9 @@ export default function LoginPage() {
         </div>
         <div className="space-y-6">
           <p className="text-3xl font-semibold leading-snug">
-            부서 AI가 회사 안에서만
+            필요한 AI 서비스만 골라
             <br />
-            일하는 업무 시스템
+            회사 안에서 쓰는 업무 시스템
           </p>
           <dl className="grid max-w-md grid-cols-2 gap-3 text-sm">
             <div className="rounded-2xl bg-white/10 p-4">
@@ -82,7 +82,7 @@ export default function LoginPage() {
               {ACCOUNTS.map((a) => (
                 <button key={a.id} type="button" onClick={() => enter(a.id)}
                   className="rounded-xl border border-ink-100 bg-surface px-3 py-2 text-left text-sm hover:border-brand-500">
-                  <span className="block font-medium">{a.dept}</span>
+                  <span className="block font-medium">{a.role}</span>
                   <span className="block truncate text-xs text-ink-500">{a.email}</span>
                 </button>
               ))}
