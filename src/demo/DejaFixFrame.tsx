@@ -43,5 +43,5 @@ export default function DejaFixFrame() {
     return () => clearInterval(t)
   }, [navigate])
 
-  return <iframe ref={frame} title="DejaFix (목 데이터)" src={first.current} className="absolute inset-0 block h-full w-full border-0 bg-surface" />
+  return <iframe ref={frame} data-dejafix title="DejaFix (목 데이터)" src={first.current} className="absolute inset-0 block h-full w-full border-0 bg-surface" />
 }
