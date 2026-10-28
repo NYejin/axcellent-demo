@@ -26,6 +26,7 @@ import { canOpen, homeOf, useSession } from '@/demo/session'
 import { useEnabledServices } from '@/demo/services'
 import ServiceCatalog from '@/demo/ServiceCatalog'
 import CatalogHome from '@/demo/CatalogHome'
+import ControlCenter from '@/control/ControlCenter'
 
 export function App() {
   return (
@@ -75,6 +76,7 @@ function Pages() {
           <Route path="/infra/*" element={<DejaFixFrame />} />
           <Route path="/system/hosts" element={<Navigate to="/hosts" replace />} />
           <Route path="/system/services" element={<ServiceCatalog />} />
+          <Route path="/system/control/*" element={<ControlCenter />} />
           <Route path="/system/integrations" element={<Integrations />} />
           {/* catbooks 시절 /admin/* 주소 호환 */}
           <Route path="/admin/*" element={<LegacyAdminRedirect />} />

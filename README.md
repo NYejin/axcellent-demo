@@ -37,6 +37,7 @@
 | 기본 포함: AI 대화방·AI 오피스 | AXcellent | `/agents/chat`, `/agents/office` |
 | 시스템 관리: 서비스 고르기·회사 서비스 연결 | AXcellent | `/system/services`, `/system/integrations` |
 | 메인(로그인 전 서비스 카탈로그) | — | `/` → 로그인 버튼 → `/login` |
+| 관제 센터(시스템 관리자): 전체 현황·고객사·장애·사건·AI 품질·비용·사용량·고객사 연결 시연 | AXcellent | `/system/control/…` |
 
 - 화면은 ax-frontend의 부서 화면을 그대로 다시 쓰고, 서비스 단위로 메뉴만 나눴어요. 서비스 목록은 `src/demo/services.ts`에 있어요.
 - 오른쪽 위 **프로필 전환** 드롭다운으로 예시 직원 계정을 바꿔 가며 볼 수 있어요. 주소 뒤에 `?as=support`처럼 붙이면 그 계정으로 바로 들어가요. 계정 id는 `admin`, `infra`, `dev`, `planning`, `support`, `marketing`, `finance`, `hr`, `data`예요.

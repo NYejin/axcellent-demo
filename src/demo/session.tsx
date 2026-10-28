@@ -45,9 +45,9 @@ export function canOpen(account: Account, path: string, enabled = getEnabled()) 
   return bases.some((b) => matchPath(b, path))
 }
 
-/** 로그인 뒤 처음 여는 화면: 첫 서비스, 없으면 관리 화면이나 AI 대화방 */
+/** 로그인 뒤 처음 여는 화면: 시스템 관리자는 관제 센터, 나머지는 첫 서비스(없으면 AI 대화방) */
 export const homeOf = (account: Account, enabled = getEnabled()) =>
-  servicesOf(account, enabled)[0]?.entry ?? (account.admin ? '/system/services' : '/agents/chat')
+  account.admin ? '/system/control' : servicesOf(account, enabled)[0]?.entry ?? '/agents/chat'
 
 const KEY = 'axcellent-demo-account'
 const load = (): Account | null => {
