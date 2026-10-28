@@ -2,8 +2,9 @@
 // 등록 → 설치 키 발급 → 고객사 서버에 설치 → 첫 상태 신호 확인 → 서비스 고르기 → 완료
 import { useEffect, useState } from 'react'
 import { COMPANIES, LATEST_VERSION } from './data'
+import { DEMO_NEW_COMPANY, connectCompany } from '@/demo/company'
 
-const NEW = { name: '새벽커피', industry: '카페 체인', network: '192.168.30.0/24', contact: '운영 담당 (본사 IT)' }
+const NEW = { name: DEMO_NEW_COMPANY.name, industry: '카페 체인', network: DEMO_NEW_COMPANY.network, contact: '운영 담당 (본사 IT)' }
 const KEY = 'AXC-7Q2M-91KD-4F8A'
 
 const STEPS = [
@@ -128,6 +129,7 @@ function StepBody({ step, t }: { step: number; t: number }) {
       <div className="bg-emerald-50 px-5 py-4 text-emerald-800">
         <p className="font-semibold">{NEW.name}를 연결했어요</p>
         <p className="mt-1 text-sm">버전 {LATEST_VERSION} · 서비스 {PICKED.length}개 · 사내망 {NEW.network}</p>
+        <p className="mt-1 text-sm">이제 고객사 화면 상단에 "AXcellent with {NEW.name}"가 나와요.</p>
       </div>
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
@@ -172,6 +174,10 @@ export default function ConnectDemo() {
   }, [playing, step])
 
   const last = step === STEPS.length - 1
+  // 연결이 끝나면 고객사 화면 상단이 "AXcellent with 새벽커피"로 바뀐다
+  useEffect(() => {
+    if (last) connectCompany(DEMO_NEW_COMPANY.id)
+  }, [last])
   const go = (i: number) => { setStep(i); setT(0) }
   const restart = () => { go(0); setPlaying(true) }
 

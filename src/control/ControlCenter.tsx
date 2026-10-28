@@ -1,9 +1,10 @@
-// AXcellent 관제 센터 (시스템 관리자). 고객사에 설치된 AXcellent가 보내는 상태 신호만 모아 본다.
+// AXcellent 관제 센터 (AXcellent 운영팀 전용, 고객사 계정은 못 연다). 고객사에 설치된 AXcellent가 보내는 상태 신호만 모아 본다.
 // 탭: 전체 현황 · 고객사 · 장애·사건 · AI 품질 · 비용·사용량 · 고객사 연결(시연). 숫자는 data.ts의 데모 예시다.
 import { useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router'
 import { COMPANIES, COST_BY_SERVICE, COST_TREND, INCIDENTS, LATEST_VERSION, QUALITY, won, type Health, type Origin } from './data'
 import ConnectDemo from './ConnectDemo'
+import { DEMO_NEW_COMPANY, connectCompany, useCompany } from '@/demo/company'
 
 const HEALTH: Record<Health, { label: string; tone: string; dot: string }> = {
   ok: { label: '정상', tone: 'bg-emerald-50 text-emerald-700', dot: 'bg-emerald-700' },
@@ -154,10 +155,18 @@ function Overview() {
 }
 
 function Companies() {
+  const current = useCompany()
+  // 시연으로 새로 연결한 회사는 목록 맨 위에 붙인다
+  const rows = current?.id === DEMO_NEW_COMPANY.id
+    ? [{ ...COMPANIES[4], id: DEMO_NEW_COMPANY.id, name: DEMO_NEW_COMPANY.name, industry: '카페 체인', network: DEMO_NEW_COMPANY.network, version: LATEST_VERSION, lastSeenMin: 0, health: 'ok' as Health, pcs: 1, services: 4, incidentsToday: 0 }, ...COMPANIES]
+    : COMPANIES
   return (
     <Page title="고객사" desc="회사별 설치 버전, 켠 서비스, 마지막 연결 시각이에요.">
+      <p className="bg-brand-50 px-4 py-3 text-sm text-brand-700">
+        연결한 고객사 이름이 고객사 화면 상단 "AXcellent with ○○"에 나와요. 연결을 끊으면 회사 이름이 빠져요. 지금 연결: <b>{current?.name ?? '없음'}</b>
+      </p>
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="w-full min-w-[920px] text-sm">
           <thead className="bg-app text-left text-xs text-ink-500">
             <tr>
               <th className="px-5 py-3 font-medium">고객사</th>
@@ -166,12 +175,13 @@ function Companies() {
               <th className="px-3 py-3 font-medium">마지막 신호</th>
               <th className="px-3 py-3 text-right font-medium">PC</th>
               <th className="px-3 py-3 text-right font-medium">켠 서비스</th>
-              <th className="px-5 py-3 text-right font-medium">오늘 사건</th>
+              <th className="px-3 py-3 text-right font-medium">오늘 사건</th>
+              <th className="px-5 py-3 font-medium">연결</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink-100">
-            {COMPANIES.map((c) => (
-              <tr key={c.id}>
+            {rows.map((c) => (
+              <tr key={c.id} className={current?.id === c.id ? 'bg-brand-50' : ''}>
                 <td className="px-5 py-3">
                   <p className="font-medium">{c.name}</p>
                   <p className="text-xs text-ink-500">{c.industry} · <span className="font-mono">{c.network}</span></p>
@@ -184,7 +194,17 @@ function Companies() {
                 <td className={`px-3 py-3 ${c.lastSeenMin > 30 ? 'font-medium text-red-700' : 'text-ink-700'}`}>{ago(c.lastSeenMin)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{c.pcs}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{c.services} / 13</td>
-                <td className="px-5 py-3 text-right tabular-nums">{c.incidentsToday}</td>
+                <td className="px-3 py-3 text-right tabular-nums">{c.incidentsToday}</td>
+                <td className="px-5 py-3">
+                  {current?.id === c.id ? (
+                    <span className="flex items-center gap-2">
+                      <span className="chip bg-brand-600 text-white">연결됨</span>
+                      <button type="button" className="btn-ghost px-2.5 py-1 text-xs" onClick={() => connectCompany(null)}>연결 끊기</button>
+                    </span>
+                  ) : (
+                    <button type="button" className="btn-ghost px-2.5 py-1 text-xs" onClick={() => connectCompany(c.id)}>연결</button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -314,7 +334,7 @@ function Cost() {
 
 export default function ControlCenter() {
   const { pathname } = useLocation()
-  const tab = pathname.replace(/^\/system\/control\/?/, '').split('/')[0]
+  const tab = pathname.replace(/^\/control\/?/, '').split('/')[0]
   if (tab === 'companies') return <Companies />
   if (tab === 'incidents') return <Incidents />
   if (tab === 'quality') return <Quality />
