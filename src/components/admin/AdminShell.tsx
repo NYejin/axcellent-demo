@@ -4,7 +4,7 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import { AccountSwitcher } from "@/demo/AccountSwitcher";
 import { COMPANY, canOpen, homeOf, servicesOf, useSession } from "@/demo/session";
 import { activeChild, matchPath, useEnabledServices, type SubItem } from "@/demo/services";
-import { IconAgents, IconBell, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
+import { IconAgents, IconBell, IconChart, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
 import { DejaFixTools } from "@/demo/DejaFixTools";
 
 /** DejaFix 장애 대응 화면이면 그 상단바 도구를 바깥 상단바에 둔다 */
@@ -22,7 +22,18 @@ const SHARED_NAV: NavItem[] = [
   { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents, match: ["/agents/chat"] },
   { href: "/agents/office", label: "AI 오피스", Icon: IconOffice, match: ["/agents/office"] },
 ];
+// 관제 센터: 고객사에 설치된 AXcellent 상태를 모아 보는 시스템 관리자 화면 (src/control)
+const CONTROL_MENU: SubItem[] = [
+  { href: "/system/control", label: "전체 현황" },
+  { href: "/system/control/companies", label: "고객사" },
+  { href: "/system/control/incidents", label: "장애·사건" },
+  { href: "/system/control/quality", label: "AI 품질" },
+  { href: "/system/control/cost", label: "비용·사용량" },
+  { href: "/system/control/connect", label: "고객사 연결 (시연)" },
+];
+
 const SYSTEM_NAV: NavItem[] = [
+  { href: "/system/control", label: "관제 센터", Icon: IconChart, children: CONTROL_MENU, match: ["/system/control"] },
   { href: "/system/services", label: "서비스 고르기", Icon: IconDashboard, match: ["/system/services"] },
   { href: "/system/integrations", label: "회사 서비스 연결", Icon: IconLayout, match: ["/system/integrations"] },
 ];
@@ -32,7 +43,8 @@ function useNav(): NavItem[] {
   const enabled = useEnabledServices();
   if (!account) return [];
   const services = servicesOf(account, enabled).map((s) => ({ href: s.entry, label: s.name, Icon: s.Icon, logo: s.logo, children: s.children, match: s.paths }));
-  return [...services, ...SHARED_NAV, ...(account.admin ? SYSTEM_NAV : [])];
+  // 시스템 관리자는 관제 센터·관리 메뉴를 맨 위에
+  return account.admin ? [...SYSTEM_NAV, ...services, ...SHARED_NAV] : [...services, ...SHARED_NAV];
 }
 
 const isOn = (path: string, item: NavItem) => item.match.some((m) => matchPath(m, path));
