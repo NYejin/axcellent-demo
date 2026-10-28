@@ -5,7 +5,7 @@ import { AccountSwitcher } from "@/demo/AccountSwitcher";
 import { canOpen, homeOf, servicesOf, useSession } from "@/demo/session";
 import { useCompany } from "@/demo/company";
 import { activeChild, matchPath, useEnabledServices, type SubItem } from "@/demo/services";
-import { IconAgents, IconBell, IconBolt, IconChart, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
+import { IconAgents, IconBell, IconBolt, IconBox, IconChart, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
 import { DejaFixTools } from "@/demo/DejaFixTools";
 
 /** DejaFix 장애 대응 화면이면 그 상단바 도구를 바깥 상단바에 둔다 */
@@ -41,14 +41,18 @@ const CONTROL_NAV: NavItem[] = [
 const SYSTEM_NAV: NavItem[] = [
   { href: "/system/connect", label: "AXcellent 연결", Icon: IconBolt, match: ["/system/connect"] },
   { href: "/system/services", label: "서비스 고르기", Icon: IconDashboard, match: ["/system/services"] },
+  { href: "/system/hosts", label: "사내 PC 연결", Icon: IconBox, match: ["/system/hosts"] },
   { href: "/system/integrations", label: "회사 서비스 연결", Icon: IconLayout, match: ["/system/integrations"] },
 ];
 
 function useNav(): NavItem[] {
   const { account } = useSession();
   const enabled = useEnabledServices();
+  const company = useCompany();
   if (!account) return [];
   if (account.operator) return CONTROL_NAV;
+  // 회사 연결 전에는 AXcellent 연결만 보인다
+  if (!company) return account.admin ? SYSTEM_NAV.filter((n) => n.href === "/system/connect") : [];
   const services = servicesOf(account, enabled).map((s) => ({ href: s.entry, label: s.name, Icon: s.Icon, logo: s.logo, children: s.children, match: s.paths }));
   // 고객사 시스템 관리자는 관리 메뉴를 맨 위에
   return account.admin ? [...SYSTEM_NAV, ...services, ...SHARED_NAV] : [...services, ...SHARED_NAV];
