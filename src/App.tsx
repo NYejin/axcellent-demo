@@ -22,7 +22,9 @@ import InfraHosts from '@/demo/InfraHosts'
 import DejaFixFrame from '@/demo/DejaFixFrame'
 import Integrations from '@/demo/Integrations'
 import LoginPage from '@/demo/LoginPage'
-import { canOpen, useSession } from '@/demo/session'
+import { canOpen, homeOf, useSession } from '@/demo/session'
+import { useEnabledServices } from '@/demo/services'
+import ServiceCatalog from '@/demo/ServiceCatalog'
 
 export function App() {
   return (
@@ -33,12 +35,13 @@ export function App() {
   )
 }
 
-/** 로그인하지 않았으면 로그인 화면으로, 내 부서가 열 수 없는 화면이면 내 부서 홈으로 보낸다 */
+/** 로그인하지 않았으면 로그인 화면으로, 배정되지 않았거나 회사가 끈 서비스 화면이면 내 첫 화면으로 보낸다 */
 function Guarded({ children }: { children: ReactNode }) {
   const { account } = useSession()
   const { pathname } = useLocation()
+  const enabled = useEnabledServices()
   if (!account) return <Navigate to="/login" replace />
-  if (!canOpen(account, pathname)) return <Navigate to={account.home} replace />
+  if (!canOpen(account, pathname, enabled)) return <Navigate to={homeOf(account, enabled)} replace />
   return <>{children}</>
 }
 
@@ -64,9 +67,11 @@ function Pages() {
           <Route path="/agents/chat" element={<AgentChat />} />
           <Route path="/agents/office" element={<AgentOffice />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/infra/hosts" element={<InfraHosts />} />
+          <Route path="/hosts" element={<InfraHosts />} />
+          <Route path="/infra/hosts" element={<Navigate to="/hosts" replace />} />
           <Route path="/infra/*" element={<DejaFixFrame />} />
-          <Route path="/system/hosts" element={<Navigate to="/infra/hosts" replace />} />
+          <Route path="/system/hosts" element={<Navigate to="/hosts" replace />} />
+          <Route path="/system/services" element={<ServiceCatalog />} />
           <Route path="/system/integrations" element={<Integrations />} />
           {/* catbooks 시절 /admin/* 주소 호환 */}
           <Route path="/admin/*" element={<LegacyAdminRedirect />} />

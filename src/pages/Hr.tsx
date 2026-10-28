@@ -61,7 +61,7 @@ interface View { handovers: HandoverView[]; cards: HrCard[]; roster: Roster }
 export type HrPart = "hr" | "ops";
 const PART = {
   hr: {
-    title: "인사 AI",
+    title: "인수인계",
     desc: "담당이 바뀔 때 일이 끊기지 않게 인수인계와 담당 명부를 관리합니다.",
     guide: [
       <>맨 위 <b>지금 사람이 할 일</b>에서 인계자의 답을 기다리는 질문을 봅니다.</>,
@@ -70,7 +70,7 @@ const PART = {
     ],
   },
   ops: {
-    title: "운영 AI",
+    title: "결정 기록",
     desc: "회사의 결정을 기록으로 남기고, 새 계획이 과거에 기각된 안과 겹치는지 확인합니다.",
     guide: [
       <>맨 위 <b>지금 사람이 할 일</b>에서 확신이 낮아 후보로 남은 기록을 봅니다.</>,
@@ -135,7 +135,7 @@ export default function HrPage({ part = "hr" }: { part?: HrPart }) {
           </div>
           <p className={`ml-auto max-w-sm pb-1 text-xs ${tone}`}>
             {part === "ops"
-              ? "대부분의 기록은 운영 AI가 근거를 보고 바로 남깁니다. 근거가 약해 확신이 낮은 기록만 여기로 옵니다."
+              ? "대부분의 기록은 AI가 근거를 보고 바로 남깁니다. 근거가 약해 확신이 낮은 기록만 여기로 옵니다."
               : "인계자만 알 수 있는 내용을 묻는 질문만 여기로 옵니다."}
           </p>
         </div>
@@ -172,7 +172,7 @@ export default function HrPage({ part = "hr" }: { part?: HrPart }) {
       {part === "ops" && <>
       {/* ④ 기록 도구 */}
       <Section title="계획 비교" desc="새 계획이 과거에 기각된 안과 겹치는지 확인합니다. 저장하지 않고 보기만 합니다."><PlanChecker /></Section>
-      <Section title={`${P.title}가 한 일`} desc={`사건 번호로 ${P.title}의 처리 내역을 시간순으로 봅니다.`}><Activity /></Section>
+      <Section title="AI가 한 일" desc="사건 번호로 AI의 처리 내역을 시간순으로 봅니다."><Activity /></Section>
       </>}
     </div>
   );

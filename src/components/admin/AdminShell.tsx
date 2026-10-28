@@ -1,53 +1,38 @@
 import { Link } from "@/lib/nav";
 import { usePathname } from "@/lib/nav";
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
 import { AccountSwitcher } from "@/demo/AccountSwitcher";
-import { COMPANY, canOpen, useSession } from "@/demo/session";
-import { IconAgents, IconBell, IconBolt, IconBox, IconChart, IconCode, IconDashboard, IconGear, IconLayout, IconMegaphone, IconOffice, IconPlan, IconSearch, IconShield, IconUsers } from "../icons";
+import { COMPANY, canOpen, homeOf, servicesOf, useSession } from "@/demo/session";
+import { activeChild, matchPath, useEnabledServices, type SubItem } from "@/demo/services";
+import { IconAgents, IconBell, IconDashboard, IconLayout, IconOffice, IconSearch } from "../icons";
 import { UiStyleToggle, useUiStyle } from "@/demo/uiStyle";
-import { IconUser } from "../icons";
 
-type SubItem = { href: string; label: string; soon?: boolean };
-type NavItem = { href: string; label: string; Icon: (p: { size?: number }) => ReactNode; logo?: string; children?: SubItem[] };
+// 메뉴는 부서가 아니라 서비스다. 이 계정에 배정됐고 회사가 켠 서비스만 보인다 (src/demo/services.ts, session.tsx).
+type NavItem = { href: string; label: string; Icon: ComponentType<{ size?: number }>; logo?: string; children?: SubItem[]; match: string[] };
 
 /** 메뉴 아이콘. logo가 있으면 아이콘 대신 그 이미지를 쓴다 (DejaFix) */
 function NavIcon({ item, size }: { item: NavItem; size: number }) {
   return item.logo ? <img src={item.logo} alt="" width={size} height={size} className="shrink-0" /> : <item.Icon size={size} />;
 }
 
-// 인프라 AI = DejaFix. DejaFix 자체 사이드바 메뉴를 이 바깥 메뉴의 하위 항목으로 꺼냈다 (DejaFix 화면은 src/demo/DejaFixFrame.tsx).
-const INFRA_MENU: SubItem[] = [
-  { href: "/infra", label: "현황 · 장애 대응" },
-  { href: "/infra/cost", label: "비용 절감", soon: true },
-  { href: "/infra/compare", label: "서버 비교", soon: true },
-  { href: "/infra/reports", label: "리포트" },
-  { href: "/infra/plans", label: "변경 계획" },
-  { href: "/infra/alerts", label: "알림" },
-  { href: "/infra/admin", label: "관리자" },
-  { href: "/infra/hosts", label: "부서 PC 연결" },
+const SHARED_NAV: NavItem[] = [
+  { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents, match: ["/agents/chat"] },
+  { href: "/agents/office", label: "AI 오피스", Icon: IconOffice, match: ["/agents/office"] },
+];
+const SYSTEM_NAV: NavItem[] = [
+  { href: "/system/services", label: "서비스 고르기", Icon: IconDashboard, match: ["/system/services"] },
+  { href: "/system/integrations", label: "회사 서비스 연결", Icon: IconLayout, match: ["/system/integrations"] },
 ];
 
-const NAV: NavItem[] = [
-  { href: "/", label: "대시보드", Icon: IconDashboard },
-  { href: "/orchestrator", label: "총괄", Icon: IconBolt },
-  { href: "/finance", label: "재무 AI", Icon: IconShield },
-  { href: "/data", label: "데이터분석 AI", Icon: IconChart },
-  { href: "/hr", label: "인사 AI", Icon: IconUsers },
-  { href: "/ops", label: "운영 AI", Icon: IconGear },
-  { href: "/marketing", label: "마케팅 AI", Icon: IconMegaphone },
-  { href: "/planning", label: "기획 AI", Icon: IconPlan },
-  { href: "/dev", label: "개발 AI", Icon: IconCode },
-  { href: "/infra", label: "DejaFix", Icon: IconBox, logo: `${import.meta.env.BASE_URL}dejafix/logo-mark.png`, children: INFRA_MENU },
-  { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents },
-  { href: "/support", label: "고객지원 AI", Icon: IconUser },
-  { href: "/agents/office", label: "AI 오피스", Icon: IconOffice },
-  // 데모에서 더한 시스템 관리 화면 (관리자 계정만)
-  { href: "/system/integrations", label: "서비스 연결", Icon: IconLayout },
-];
+function useNav(): NavItem[] {
+  const { account } = useSession();
+  const enabled = useEnabledServices();
+  if (!account) return [];
+  const services = servicesOf(account, enabled).map((s) => ({ href: s.entry, label: s.name, Icon: s.Icon, logo: s.logo, children: s.children, match: s.paths }));
+  return [...services, ...SHARED_NAV, ...(account.admin ? SYSTEM_NAV : [])];
+}
 
-const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
-/** 하위 메뉴: 부모 주소(/infra)는 그 자체일 때만, 나머지는 그 아래까지 켠다 */
-const isSubActive = (path: string, parent: string, href: string) => (href === parent ? path === href : isActive(path, href));
+const isOn = (path: string, item: NavItem) => item.match.some((m) => matchPath(m, path));
 
 function LogoMark() {
   return (
@@ -59,10 +44,11 @@ function LogoMark() {
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const { account } = useSession();
-  const nav = NAV.filter(({ href }) => account && canOpen(account, href));
-  const home = account?.home ?? "/";
+  const nav = useNav();
+  const home = account ? homeOf(account) : "/";
   const ui = useUiStyle();
-  const subNav = nav.find((n) => n.children && isActive(path, n.href));
+  const subNav = nav.find((n) => n.children && isOn(path, n));
+  const subOn = subNav ? activeChild(path, subNav.children!) : undefined;
   if (ui === "common") return <CommonShell nav={nav} home={home}>{children}</CommonShell>;
 
   return (
@@ -72,7 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <Link href={home} className="mb-6" aria-label="내 부서 홈"><LogoMark /></Link>
           {nav.map((item) => {
             const { href, label } = item;
-            const on = isActive(path, href);
+            const on = isOn(path, item);
             return (
               <Link key={href} href={href} title={label} aria-label={label} aria-current={on ? "page" : undefined}
                 className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition ${on ? "text-brand-600" : "text-ink-500 hover:bg-ink-100 hover:text-ink-900"}`}>
@@ -88,8 +74,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <header className="flex h-[72px] shrink-0 items-center gap-6 px-8">
             <span className="mr-2 shrink-0 text-[15px] font-semibold tracking-tight">AXcellent <span className="font-normal text-ink-500">with</span> {COMPANY.name}</span>
             <div className="flex min-w-0 flex-1 items-center gap-6 overflow-x-auto py-1 scroll-thin">
-            {nav.map(({ href, label }) => {
-              const on = isActive(path, href);
+            {nav.map((item) => {
+              const { href, label } = item;
+              const on = isOn(path, item);
               return (
                 <Link key={href} href={href} aria-current={on ? "page" : undefined}
                   className={`relative shrink-0 py-2 text-sm transition ${on ? "font-semibold text-ink-900" : "text-ink-500 hover:text-ink-900"}`}>
@@ -109,7 +96,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {subNav && (
             <nav className="flex shrink-0 items-center gap-5 overflow-x-auto border-b border-ink-100 px-8 scroll-thin" aria-label={`${subNav.label} 메뉴`}>
               {subNav.children!.map((c) => {
-                const on = isSubActive(path, subNav.href, c.href);
+                const on = c.href === subOn;
                 return (
                   <Link key={c.href} href={c.href} aria-current={on ? "page" : undefined}
                     className={`relative shrink-0 py-2.5 text-[13px] transition ${on ? "font-semibold text-brand-600" : "text-ink-500 hover:text-ink-900"}`}>
@@ -135,7 +122,7 @@ const readSide = () => {
   try { return localStorage.getItem(SIDE_KEY) === "collapsed"; } catch { return false; }
 };
 
-function CommonShell({ nav, home, children }: { nav: typeof NAV; home: string; children: ReactNode }) {
+function CommonShell({ nav, home, children }: { nav: NavItem[]; home: string; children: ReactNode }) {
   const path = usePathname();
   const { account } = useSession();
   const [collapsed, setCollapsed] = useState(readSide);
@@ -160,8 +147,9 @@ function CommonShell({ nav, home, children }: { nav: typeof NAV; home: string; c
         </div>
         {nav.map((item) => {
           const { href, label, children: subs } = item;
-          const on = isActive(path, href);
+          const on = isOn(path, item);
           const open = on && subs && !collapsed;
+          const subOn = open ? activeChild(path, subs) : undefined;
           return (
             <div key={href}>
               <Link href={href} title={collapsed ? label : undefined} aria-label={label} aria-current={on && !subs ? "page" : undefined}
@@ -170,7 +158,7 @@ function CommonShell({ nav, home, children }: { nav: typeof NAV; home: string; c
                 {!collapsed && <span className="truncate">{label}</span>}
               </Link>
               {open && subs.map((c) => {
-                const sub = isSubActive(path, href, c.href);
+                const sub = c.href === subOn;
                 return (
                   <Link key={c.href} href={c.href} aria-current={sub ? "page" : undefined}
                     className={`flex items-center gap-2 py-2.5 pl-[50px] pr-[18px] text-[13px] transition ${sub ? "bg-[#5b5bd6] font-semibold text-white" : "text-[#c9c9e6] hover:bg-white/10"}`}>

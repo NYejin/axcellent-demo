@@ -24,7 +24,7 @@ interface Section { label: string; icon: IconName; tabs: { id: string; label: st
 export type PlanningPart = 'planning' | 'dev'
 const PARTS: Record<PlanningPart, { title: string; desc: string; home: string; sections: Record<string, Section> }> = {
   planning: {
-    title: '기획 AI',
+    title: '요청·기획서',
     desc: '다른 부서의 요청을 받아 기획서로 정리하고, 결과를 요청한 부서에 알립니다.',
     home: 'requests',
     sections: {
@@ -41,7 +41,7 @@ const PARTS: Record<PlanningPart, { title: string; desc: string; home: string; s
     },
   },
   dev: {
-    title: '개발 AI',
+    title: '개발·배포',
     desc: '확정된 기획서를 작업·PR로 만들고, 교차검증·배포·사후관리까지 맡습니다.',
     home: 'work/prs',
     sections: {
