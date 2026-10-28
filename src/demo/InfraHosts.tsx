@@ -38,7 +38,7 @@ export default function InfraHosts() {
     <div className="mx-auto max-w-6xl space-y-6 px-8 py-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-ink-500">인프라 AI · DejaFix</p>
+          <p className="text-sm text-ink-500">DejaFix · 인프라팀</p>
           <h1 className="text-2xl font-semibold">부서 PC 연결</h1>
           <p className="mt-1 text-sm text-ink-500">부서 PC를 사내 IP로 연결하고 연결 상태를 챙깁니다.</p>
         </div>

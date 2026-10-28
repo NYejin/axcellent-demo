@@ -8,7 +8,12 @@ import { UiStyleToggle, useUiStyle } from "@/demo/uiStyle";
 import { IconUser } from "../icons";
 
 type SubItem = { href: string; label: string; soon?: boolean };
-type NavItem = { href: string; label: string; Icon: (p: { size?: number }) => ReactNode; children?: SubItem[] };
+type NavItem = { href: string; label: string; Icon: (p: { size?: number }) => ReactNode; logo?: string; children?: SubItem[] };
+
+/** 메뉴 아이콘. logo가 있으면 아이콘 대신 그 이미지를 쓴다 (DejaFix) */
+function NavIcon({ item, size }: { item: NavItem; size: number }) {
+  return item.logo ? <img src={item.logo} alt="" width={size} height={size} className="shrink-0" /> : <item.Icon size={size} />;
+}
 
 // 인프라 AI = DejaFix. DejaFix 자체 사이드바 메뉴를 이 바깥 메뉴의 하위 항목으로 꺼냈다 (DejaFix 화면은 src/demo/DejaFixFrame.tsx).
 const INFRA_MENU: SubItem[] = [
@@ -32,7 +37,7 @@ const NAV: NavItem[] = [
   { href: "/marketing", label: "마케팅 AI", Icon: IconMegaphone },
   { href: "/planning", label: "기획 AI", Icon: IconPlan },
   { href: "/dev", label: "개발 AI", Icon: IconCode },
-  { href: "/infra", label: "인프라 AI", Icon: IconBox, children: INFRA_MENU },
+  { href: "/infra", label: "DejaFix", Icon: IconBox, logo: `${import.meta.env.BASE_URL}dejafix/logo-mark.png`, children: INFRA_MENU },
   { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents },
   { href: "/support", label: "고객지원 AI", Icon: IconUser },
   { href: "/agents/office", label: "AI 오피스", Icon: IconOffice },
@@ -65,13 +70,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 overflow-hidden bg-app">
         <nav className="flex w-[76px] shrink-0 flex-col items-center gap-2 border-r border-ink-100 py-6" aria-label="주 메뉴">
           <Link href={home} className="mb-6" aria-label="내 부서 홈"><LogoMark /></Link>
-          {nav.map(({ href, label, Icon }) => {
+          {nav.map((item) => {
+            const { href, label } = item;
             const on = isActive(path, href);
             return (
               <Link key={href} href={href} title={label} aria-label={label} aria-current={on ? "page" : undefined}
                 className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition ${on ? "text-brand-600" : "text-ink-500 hover:bg-ink-100 hover:text-ink-900"}`}>
                 {on && <span className="absolute -left-[16px] h-6 w-1 rounded-r bg-accent" />}
-                <Icon size={20} />
+                <NavIcon item={item} size={20} />
               </Link>
             );
           })}
@@ -152,14 +158,15 @@ function CommonShell({ nav, home, children }: { nav: typeof NAV; home: string; c
             </Link>
           )}
         </div>
-        {nav.map(({ href, label, Icon, children: subs }) => {
+        {nav.map((item) => {
+          const { href, label, children: subs } = item;
           const on = isActive(path, href);
           const open = on && subs && !collapsed;
           return (
             <div key={href}>
               <Link href={href} title={collapsed ? label : undefined} aria-label={label} aria-current={on && !subs ? "page" : undefined}
                 className={`flex items-center gap-3.5 py-[13px] text-sm font-semibold transition ${collapsed ? "justify-center" : "px-[18px]"} ${on ? (open ? "text-white" : "bg-[#5b5bd6] text-white") : "hover:bg-white/10"}`}>
-                <Icon size={18} />
+                <NavIcon item={item} size={item.logo ? 22 : 18} />
                 {!collapsed && <span className="truncate">{label}</span>}
               </Link>
               {open && subs.map((c) => {
