@@ -19,6 +19,7 @@ import Queue from '@/pages/Queue'
 import Reviews from '@/pages/Reviews'
 import Support from '@/pages/Support'
 import InfraHosts from '@/demo/InfraHosts'
+import DejaFixFrame from '@/demo/DejaFixFrame'
 import Integrations from '@/demo/Integrations'
 import LoginPage from '@/demo/LoginPage'
 import { canOpen, useSession } from '@/demo/session'
@@ -63,8 +64,9 @@ function Pages() {
           <Route path="/agents/chat" element={<AgentChat />} />
           <Route path="/agents/office" element={<AgentOffice />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/infra" element={<InfraHosts />} />
-          <Route path="/system/hosts" element={<Navigate to="/infra" replace />} />
+          <Route path="/infra/hosts" element={<InfraHosts />} />
+          <Route path="/infra/*" element={<DejaFixFrame />} />
+          <Route path="/system/hosts" element={<Navigate to="/infra/hosts" replace />} />
           <Route path="/system/integrations" element={<Integrations />} />
           {/* catbooks 시절 /admin/* 주소 호환 */}
           <Route path="/admin/*" element={<LegacyAdminRedirect />} />

@@ -20,7 +20,7 @@
 | 화면 | 주소 | 누가 보나 |
 | --- | --- | --- |
 | 로그인 | `/login` | 모두 |
-| 인프라 AI (인프라팀 = DejaFix 서비스 화면 + 부서 PC 연결) | `/infra` | 인프라팀 |
+| 인프라 AI (인프라팀 = DejaFix 서비스 화면, 메뉴는 바깥 사이드바 하위 메뉴) | `/infra`, `/infra/reports` … `/infra/hosts` | 인프라팀 |
 | 서비스 연결 (고객사 서비스 연결부) | `/system/integrations` | 시스템 관리 |
 | 부서 화면 (기획·개발·고객지원·마케팅·인사·운영·재무·데이터분석) | `/planning`, `/dev`, `/hr`, `/ops` 등 | 해당 부서 |
 | AI 대화방·AI 오피스 | `/agents/chat`, `/agents/office` | 모든 부서 |
@@ -49,7 +49,7 @@ npm run build:pages  # GitHub Pages용 빌드 (dist/, 404.html 포함)
 
 ## DejaFix 서비스 화면
 
-인프라 AI의 **DejaFix 서비스** 탭은 DejaFix 레포(`DejaFix/DejaFix`)의 frontend를 목 데이터 버전으로 빌드해 `public/dejafix/`에 넣은 거예요. 백엔드 없이 DejaFix 자체 목(MSW)으로 돌아가고, 데모 관리자로 바로 로그인돼요.
+인프라 AI 화면은 DejaFix 레포(`DejaFix/DejaFix`)의 frontend를 목 데이터 버전으로 빌드해 `public/dejafix/`에 넣은 거예요. 백엔드 없이 DejaFix 자체 목(MSW)으로 돌아가고, 데모 관리자로 바로 로그인돼요.
 
 DejaFix 화면을 최신으로 바꾸려면:
 

@@ -7,7 +7,22 @@ import { IconAgents, IconBell, IconBolt, IconBox, IconChart, IconCode, IconDashb
 import { UiStyleToggle, useUiStyle } from "@/demo/uiStyle";
 import { IconUser } from "../icons";
 
-const NAV = [
+type SubItem = { href: string; label: string; soon?: boolean };
+type NavItem = { href: string; label: string; Icon: (p: { size?: number }) => ReactNode; children?: SubItem[] };
+
+// 인프라 AI = DejaFix. DejaFix 자체 사이드바 메뉴를 이 바깥 메뉴의 하위 항목으로 꺼냈다 (DejaFix 화면은 src/demo/DejaFixFrame.tsx).
+const INFRA_MENU: SubItem[] = [
+  { href: "/infra", label: "현황 · 장애 대응" },
+  { href: "/infra/cost", label: "비용 절감", soon: true },
+  { href: "/infra/compare", label: "서버 비교", soon: true },
+  { href: "/infra/reports", label: "리포트" },
+  { href: "/infra/plans", label: "변경 계획" },
+  { href: "/infra/alerts", label: "알림" },
+  { href: "/infra/admin", label: "관리자" },
+  { href: "/infra/hosts", label: "부서 PC 연결" },
+];
+
+const NAV: NavItem[] = [
   { href: "/", label: "대시보드", Icon: IconDashboard },
   { href: "/orchestrator", label: "총괄", Icon: IconBolt },
   { href: "/finance", label: "재무 AI", Icon: IconShield },
@@ -17,7 +32,7 @@ const NAV = [
   { href: "/marketing", label: "마케팅 AI", Icon: IconMegaphone },
   { href: "/planning", label: "기획 AI", Icon: IconPlan },
   { href: "/dev", label: "개발 AI", Icon: IconCode },
-  { href: "/infra", label: "인프라 AI", Icon: IconBox },
+  { href: "/infra", label: "인프라 AI", Icon: IconBox, children: INFRA_MENU },
   { href: "/agents/chat", label: "AI 대화방", Icon: IconAgents },
   { href: "/support", label: "고객지원 AI", Icon: IconUser },
   { href: "/agents/office", label: "AI 오피스", Icon: IconOffice },
@@ -25,7 +40,9 @@ const NAV = [
   { href: "/system/integrations", label: "서비스 연결", Icon: IconLayout },
 ];
 
-const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
+/** 하위 메뉴: 부모 주소(/infra)는 그 자체일 때만, 나머지는 그 아래까지 켠다 */
+const isSubActive = (path: string, parent: string, href: string) => (href === parent ? path === href : isActive(path, href));
 
 function LogoMark() {
   return (
@@ -40,6 +57,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const nav = NAV.filter(({ href }) => account && canOpen(account, href));
   const home = account?.home ?? "/";
   const ui = useUiStyle();
+  const subNav = nav.find((n) => n.children && isActive(path, n.href));
   if (ui === "common") return <CommonShell nav={nav} home={home}>{children}</CommonShell>;
 
   return (
@@ -82,6 +100,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <AccountSwitcher />
             </div>
           </header>
+          {subNav && (
+            <nav className="flex shrink-0 items-center gap-5 overflow-x-auto border-b border-ink-100 px-8 scroll-thin" aria-label={`${subNav.label} 메뉴`}>
+              {subNav.children!.map((c) => {
+                const on = isSubActive(path, subNav.href, c.href);
+                return (
+                  <Link key={c.href} href={c.href} aria-current={on ? "page" : undefined}
+                    className={`relative shrink-0 py-2.5 text-[13px] transition ${on ? "font-semibold text-brand-600" : "text-ink-500 hover:text-ink-900"}`}>
+                    {c.label}{c.soon && <span className="ml-1 text-[11px] text-ink-300">준비 중</span>}
+                    {on && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-brand-600" />}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
           <main className="relative min-h-0 flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>
@@ -120,14 +152,27 @@ function CommonShell({ nav, home, children }: { nav: typeof NAV; home: string; c
             </Link>
           )}
         </div>
-        {nav.map(({ href, label, Icon }) => {
+        {nav.map(({ href, label, Icon, children: subs }) => {
           const on = isActive(path, href);
+          const open = on && subs && !collapsed;
           return (
-            <Link key={href} href={href} title={collapsed ? label : undefined} aria-label={label} aria-current={on ? "page" : undefined}
-              className={`flex items-center gap-3.5 py-[13px] text-sm font-semibold transition ${collapsed ? "justify-center" : "px-[18px]"} ${on ? "bg-[#5b5bd6] text-white" : "hover:bg-white/10"}`}>
-              <Icon size={18} />
-              {!collapsed && <span className="truncate">{label}</span>}
-            </Link>
+            <div key={href}>
+              <Link href={href} title={collapsed ? label : undefined} aria-label={label} aria-current={on && !subs ? "page" : undefined}
+                className={`flex items-center gap-3.5 py-[13px] text-sm font-semibold transition ${collapsed ? "justify-center" : "px-[18px]"} ${on ? (open ? "text-white" : "bg-[#5b5bd6] text-white") : "hover:bg-white/10"}`}>
+                <Icon size={18} />
+                {!collapsed && <span className="truncate">{label}</span>}
+              </Link>
+              {open && subs.map((c) => {
+                const sub = isSubActive(path, href, c.href);
+                return (
+                  <Link key={c.href} href={c.href} aria-current={sub ? "page" : undefined}
+                    className={`flex items-center gap-2 py-2.5 pl-[50px] pr-[18px] text-[13px] transition ${sub ? "bg-[#5b5bd6] font-semibold text-white" : "text-[#c9c9e6] hover:bg-white/10"}`}>
+                    <span className="truncate">{c.label}</span>
+                    {c.soon && <span className="ml-auto shrink-0 bg-white/10 px-1.5 text-[11px] text-[#9a9ac4]">준비 중</span>}
+                  </Link>
+                );
+              })}
+            </div>
           );
         })}
       </aside>
